@@ -1,0 +1,61 @@
+stages:
+  - build
+
+build:electron:
+  stage: build
+  image: registry.ethicsinfotech.in/ethics-projects/ethics-python/ethics-medicine-strip/ci-builder:latest
+
+  before_script:
+    - echo '{"token":"'"$GITLAB_READ_TOKEN"'"}' > frontend/electron/update-config.json
+
+  script:
+    # -------------------------
+    # Build Python binary
+    # -------------------------
+    - cd machine_code
+    - uv sync --group dev
+    - uv run pyinstaller machine_controller.spec --noconfirm
+    - |
+      if find dist/machine_controller -name 'mvIMPACT*' | grep -q .; then
+        echo "mvIMPACT bundled OK"
+      else
+        echo "mvIMPACT NOT found in PyInstaller bundle, aborting"
+        exit 1
+      fi
+
+    - cd ..
+
+    # -------------------------
+    # Electron build
+    # -------------------------
+    - cd frontend
+    - |
+      PKG_VERSION=$(node -p "require('./package.json').version")
+      TAG_VERSION=${CI_COMMIT_TAG#v}
+      if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+        echo "ERROR: package.json version ($PKG_VERSION) does not match git tag ($CI_COMMIT_TAG)"
+        exit 1
+      fi
+    - npm install
+    - npm run electron:build:linux
+
+    # -------------------------
+    # Upload AppImage
+    # -------------------------
+    - |
+      APPIMAGE=$(ls release/*.AppImage | head -1)
+      APPIMAGE_NAME=$(basename "$APPIMAGE" | sed 's/ /%20/g')
+      curl --fail --silent --show-error \
+        --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+        --upload-file "$APPIMAGE" \
+        "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/updates/latest/${APPIMAGE_NAME}"
+
+    - sed -i '/blockMapSize/d' release/latest-linux.yml
+    - |
+      curl --fail --silent --show-error \
+        --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+        --upload-file release/latest-linux.yml \
+        "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/updates/latest/latest-linux.yml"
+
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+/'

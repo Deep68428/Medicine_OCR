@@ -1,0 +1,298 @@
+{
+  "title": "MedicineBox — MinIO Uploads",
+  "uid": "medicinebox-minio-uploads",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "label": "Loki Source",
+        "type": "datasource",
+        "pluginId": "loki",
+        "refresh": 1,
+        "hide": 0,
+        "current": {}
+      },
+      {
+        "name": "machine_id",
+        "label": "Machine",
+        "type": "query",
+        "datasource": {
+          "type": "loki",
+          "uid": "${datasource}"
+        },
+        "query": "label_values({job=\"medicine_box\"}, machine_id)",
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "sort": 1,
+        "current": {}
+      },
+      {
+        "name": "picknote",
+        "label": "Picknote",
+        "type": "query",
+        "datasource": {
+          "type": "loki",
+          "uid": "${datasource}"
+        },
+        "query": "label_values({job=\"medicine_box\", machine_id=~\"$machine_id\", picknote=~\".+\"}, picknote)",
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".+",
+        "sort": 1,
+        "current": {}
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Total Uploads",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "expr": "sum(count_over_time({job=\"medicine_box\", machine_id=~\"$machine_id\", picknote=~\"$picknote\"} |= \"MinIO upload succeeded for\" | json | subdir = \"full_image\" [$__range]))",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "displayName": "Total Uploads",
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Uploads by Machine",
+      "type": "bargauge",
+      "gridPos": {
+        "x": 4,
+        "y": 0,
+        "w": 10,
+        "h": 4
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (machine_id) (count_over_time({job=\"medicine_box\", machine_id=~\"$machine_id\", picknote=~\"$picknote\"} |= \"MinIO upload succeeded for\" | json | subdir = \"full_image\" [$__range]))",
+          "legendFormat": "Machine {{machine_id}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "values": true,
+          "calcs": [],
+          "fields": ""
+        },
+        "displayMode": "lcd",
+        "showUnfilled": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Upload Log — Trace / Picknote / Machine / Stage / URL",
+      "description": "One row per MinIO upload. trace, stage, picknote, and machine_id are forwarded by the LokiSink from logger.bind() extra fields. URL is the 7-day presigned GET link.",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 24,
+        "h": 18
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "expr": "{job=\"medicine_box\", machine_id=~\"$machine_id\", picknote=~\"$picknote\"} |= \"MinIO upload succeeded for\" | json | subdir = \"full_image\" | regexp \"MinIO upload succeeded for (?P<url>https?://[^\\\"]+)\" | line_format \"trace_id={{.trace}} picknote={{.picknote}} stage={{.stage}} url={{.url}}\"",
+          "refId": "A"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "source": "labels",
+            "replace": false
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "timestamp": true,
+              "level": true,
+              "module": true,
+              "function": true,
+              "line": true,
+              "source": true,
+              "job": true,
+              "trace_id": true,
+              "Line": true,
+              "id": true,
+              "labels": true,
+              "tsNs": true,
+              "message": true,
+              "subdir": true,
+              "label": true,
+              "type": true,
+              "detected": true
+            },
+            "renameByName": {
+              "trace": "Trace ID",
+              "picknote": "Picknote",
+              "machine_id": "Machine ID",
+              "stage": "Stage",
+              "url": "URL",
+              "Time": "Time"
+            },
+            "indexByName": {
+              "Time": 0,
+              "trace": 1,
+              "picknote": 2,
+              "machine_id": 3,
+              "stage": 4,
+              "url": 5
+            }
+          }
+        }
+      ],
+      "options": {
+        "sortBy": [
+          {
+            "displayName": "Time",
+            "desc": true
+          }
+        ],
+        "footer": {
+          "show": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "filterable": true,
+            "inspect": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "URL"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open Image",
+                    "url": "${__value.text}",
+                    "targetBlank": true
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 420
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Trace ID"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Machine ID"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Stage"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Picknote"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

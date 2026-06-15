@@ -1,0 +1,194 @@
+{
+  "title": "MedicineBox — Live Machine Logs",
+  "uid": "medicinebox-live-logs",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "5s",
+  "time": { "from": "now-30m", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "label": "Loki Source",
+        "type": "datasource",
+        "pluginId": "loki",
+        "refresh": 1,
+        "hide": 0,
+        "current": {}
+      },
+      {
+        "name": "machine_id",
+        "label": "Machine",
+        "type": "query",
+        "datasource": { "type": "loki", "uid": "${datasource}" },
+        "query": "label_values({job=\"medicine_box\"}, machine_id)",
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "sort": 1,
+        "current": {}
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Log Activity by Level",
+      "description": "Log count per minute broken down by severity — spot ERROR/WARNING spikes at a glance.",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 6 },
+      "datasource": { "type": "loki", "uid": "${datasource}" },
+      "targets": [
+        {
+          "expr": "sum(count_over_time({job=\"medicine_box\", machine_id=~\"$machine_id\", level=\"ERROR\"}[1m]))",
+          "legendFormat": "ERROR",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(count_over_time({job=\"medicine_box\", machine_id=~\"$machine_id\", level=\"WARNING\"}[1m]))",
+          "legendFormat": "WARNING",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(count_over_time({job=\"medicine_box\", machine_id=~\"$machine_id\", level=\"INFO\"}[1m]))",
+          "legendFormat": "INFO",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "ERROR" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "WARNING" }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "INFO" }, "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }] }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "fillOpacity": 20,
+        "stacking": { "group": "A", "mode": "normal" }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Error Rate by Machine",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 6 },
+      "datasource": { "type": "loki", "uid": "${datasource}" },
+      "targets": [
+        {
+          "expr": "sum by (machine_id) (count_over_time({job=\"medicine_box\", machine_id=~\"$machine_id\", level=\"ERROR\"}[1m]))",
+          "legendFormat": "Machine {{machine_id}} errors",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "color": { "fixedColor": "red", "mode": "fixed" } }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Active Machines (last 5m)",
+      "type": "stat",
+      "gridPos": { "x": 12, "y": 6, "w": 6, "h": 6 },
+      "datasource": { "type": "loki", "uid": "${datasource}" },
+      "targets": [
+        {
+          "expr": "count(count by (machine_id) (count_over_time({job=\"medicine_box\"}[5m])))",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "options": { "colorMode": "background", "graphMode": "none", "textMode": "value" },
+      "fieldConfig": {
+        "defaults": { "color": { "fixedColor": "green", "mode": "fixed" }, "displayName": "Online Machines" }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Total Errors (last 5m)",
+      "type": "stat",
+      "gridPos": { "x": 18, "y": 6, "w": 6, "h": 6 },
+      "datasource": { "type": "loki", "uid": "${datasource}" },
+      "targets": [
+        {
+          "expr": "sum(count_over_time({job=\"medicine_box\", machine_id=~\"$machine_id\", level=\"ERROR\"}[5m]))",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "options": { "colorMode": "background", "graphMode": "none", "textMode": "value" },
+      "fieldConfig": {
+        "defaults": { "color": { "fixedColor": "red", "mode": "fixed" }, "displayName": "Errors" }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Live Logs — All Selected Machines",
+      "type": "logs",
+      "gridPos": { "x": 0, "y": 12, "w": 24, "h": 10 },
+      "datasource": { "type": "loki", "uid": "${datasource}" },
+      "targets": [
+        {
+          "expr": "{job=\"medicine_box\", machine_id=~\"$machine_id\"}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      }
+    },
+    {
+      "id": 6,
+      "title": "Live Logs — Errors & Warnings Only",
+      "type": "logs",
+      "gridPos": { "x": 0, "y": 22, "w": 24, "h": 8 },
+      "datasource": { "type": "loki", "uid": "${datasource}" },
+      "targets": [
+        {
+          "expr": "{job=\"medicine_box\", machine_id=~\"$machine_id\", level=~\"ERROR|WARNING|CRITICAL\"}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      }
+    },
+    {
+      "id": 7,
+      "title": "Conveyor Controller Logs",
+      "description": "Live log stream from the conveyor controller (source=controller). Shows raw conveyor commands and responses — Stop, Reverse, FWD, REV, etc.",
+      "type": "logs",
+      "gridPos": { "x": 0, "y": 30, "w": 24, "h": 9 },
+      "datasource": { "type": "loki", "uid": "${datasource}" },
+      "targets": [
+        {
+          "expr": "{job=\"medicine_box\", machine_id=~\"$machine_id\", source=\"controller\"} | json | line_format \"[Machine {{.machine_id}}] {{.message}}\"",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": false,
+        "prettifyLogMessage": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      }
+    }
+  ]
+}

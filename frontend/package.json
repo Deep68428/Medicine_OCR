@@ -1,0 +1,66 @@
+{
+  "name": "medicinestrip-ai",
+  "version": "0.0.1",
+  "description": "Pharmaceutical picknote scanning system",
+  "author": "Auth",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .\"",
+    "electron:build": "npm run build && electron-builder",
+    "electron:build:linux": "npm run build && electron-builder --linux AppImage",
+    "build:mc": "cd ../machine_code && uv sync --group dev && uv run pyinstaller machine_controller.spec --noconfirm",
+    "app:test": "npm run build:mc && npm run build && cross-env NODE_ENV=production electron .",
+    "lint": "eslint ."
+  },
+  "build": {
+    "appId": "com.ethics.medicineStrip-AI",
+    "productName": "MedicineStrip-AI",
+    "afterPack": "./afterPack.js",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../machine_code/dist/machine_controller/",
+        "to": "machine_controller/",
+        "filter": ["**/*"]
+      }
+    ],
+    "publish": {
+      "provider": "generic",
+      "url": "https://code.ethicsinfotech.in/api/v4/projects/797/packages/generic/updates/latest/"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage",
+      "artifactName": "${productName}.AppImage"
+    }
+  },
+  "dependencies": {
+    "concurrently": "^9.2.1",
+    "electron-updater": "^6.8.3",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "sweetalert2": "^11.26.22",
+    "vite": "^7.3.1",
+    "wait-on": "^9.0.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react-swc": "^4.2.3",
+    "cross-env": "^10.1.0",
+    "electron": "^40.6.1",
+    "electron-builder": "^26.8.1"
+  }
+}

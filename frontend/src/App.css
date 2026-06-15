@@ -1,0 +1,929 @@
+/* ── Global scrollbar style ─────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--tint-300);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 6px;
+  border: 3px solid var(--tint-300);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ── Design tokens ─────────────────────────────────────────── */
+:root {
+  /* Base navy derived from rgb(36, 60, 92) */
+  --navy:        #243c5c;   /* primary header / title */
+  --navy-deep:   #1a2d45;   /* hover / pressed */
+  --navy-mid:    #2e4f7a;   /* secondary accents */
+  --navy-soft:   #4a6f96;   /* muted interactive */
+  --navy-faint:  #7a9bbf;   /* placeholder / icons */
+
+  /* Tints (navy → white) */
+  --tint-100:    #d6e4f0;   /* borders */
+  --tint-200:    #e8f1f9;   /* card borders / dividers */
+  --tint-300:    #f0f6fb;   /* odd rows / soft backgrounds */
+  --tint-400:    #f7fafd;   /* page background */
+
+  --surface:     #ffffff;
+
+  --text-base:   #1a2d45;   /* body text */
+  --text-muted:  #4a6f96;
+  --text-faint:  #8aaec8;
+
+  --red-soft:    #fef2f2;
+  --red-mid:     #fca5a5;
+  --red-text:    #dc2626;
+}
+
+/* ── Reset ─────────────────────────────────────────────────── */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── App shell ─────────────────────────────────────────────── */
+.app-root {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: var(--tint-400);
+  font-size: 13px;
+  color: var(--text-base);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── Title bar ─────────────────────────────────────────────── */
+.app-title-bar {
+  background: linear-gradient(90deg, var(--navy-deep) 0%, var(--navy) 60%, var(--navy-mid) 100%);
+  border-bottom: 1px solid var(--navy-deep);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(36, 60, 92, 0.25);
+}
+
+.app-title-version {
+  margin-left: 8px;
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.6;
+  letter-spacing: 0;
+}
+
+.app-title-text {
+  font-weight: 700;
+  font-size: 15px;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+}
+
+.app-ws-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-ws-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.app-ws-text {
+  font-size: 12px;
+  color: var(--tint-100);
+  font-weight: 500;
+}
+
+.app-connect-btn {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.app-connect-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* ── Layout ────────────────────────────────────────────────── */
+.app-main {
+  display: flex;
+  gap: 14px;
+  padding: 14px 18px 8px;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+}
+
+.app-left-col {
+  width: 325px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-center-col {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+
+/* ── Error info card (right side of top row) ───────────────── */
+.app-top-row > .app-card {
+  width: 260px;
+  flex-shrink: 0;
+}
+
+/* ── Cards ─────────────────────────────────────────────────── */
+.app-card {
+  background: var(--surface);
+  border: 1px solid var(--tint-200);
+  border-radius: 7px;
+  padding: 10px 12px;
+  box-shadow: 0 1px 4px rgba(36, 60, 92, 0.07);
+}
+
+.app-card-title {
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--navy);
+  margin-bottom: 8px;
+  border-bottom: 2px solid var(--tint-200);
+  padding-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Info rows ─────────────────────────────────────────────── */
+.app-info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--tint-300);
+}
+
+.app-info-label {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.app-info-value {
+  color: var(--text-base);
+  font-size: 12px;
+  font-weight: 600;
+  max-width: 105px;
+  text-align: right;
+  word-break: break-all;
+}
+
+.app-info-value-scroll {
+  overflow-x: auto;
+  white-space: nowrap;
+  word-break: normal;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.app-info-value-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.app-info-value-error {
+  color: var(--red-text);
+}
+
+.app-info-value-muted {
+  color: var(--text-faint);
+}
+
+/* ── Top row (left: search+stats | right: error info) ─────── */
+.app-top-row {
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+  flex-shrink: 0;
+}
+
+.app-top-row-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* ── Search bar ────────────────────────────────────────────── */
+.app-search-row {
+  background: var(--tint-300);
+  border: 1px solid var(--tint-100);
+  border-radius: 7px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 1px 4px rgba(36, 60, 92, 0.06);
+}
+
+.app-search-label {
+  color: var(--navy);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.app-input {
+  flex: 1;
+  border: 1px solid var(--tint-100);
+  border-radius: 5px;
+  padding: 5px 9px;
+  font-size: 13px;
+  color: var(--text-base);
+  outline: none;
+  font-family: inherit;
+  background: var(--surface);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.app-input:focus {
+  border-color: var(--navy-soft);
+  box-shadow: 0 0 0 2px rgba(36, 60, 92, 0.12);
+}
+
+/* Done Qty cell — the value (normal mode) and the input (edit mode) share
+   identical box metrics so swapping them doesn't shift the layout */
+.app-done-qty-input,
+.app-done-qty-value {
+  box-sizing: border-box;
+  display: inline-block;
+  width: 72px;
+  flex: none;
+  text-align: center;
+  padding: 8px 6px;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.app-done-qty-value {
+  border: 1px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* ── Buttons ───────────────────────────────────────────────── */
+.app-btn {
+  border-radius: 6px;
+  padding: 6px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  font-family: inherit;
+  border: 1px solid transparent;
+  transition: background-color 0.15s ease, color 0.15s ease,
+    border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.app-btn-search {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #ffffff;
+  box-shadow: 0 1px 4px rgba(36, 60, 92, 0.25);
+}
+
+.app-btn-search:hover {
+  background: var(--navy-deep);
+  border-color: var(--navy-deep);
+}
+
+.app-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+/* ── Stat boxes ────────────────────────────────────────────── */
+.app-stats-row {
+  display: flex;
+  gap: 10px;
+}
+
+.app-stat-box {
+  flex: 1;
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.app-stat-box:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(36, 60, 92, 0.14);
+}
+
+.app-stat-box-active {
+  box-shadow: 0 0 0 2px var(--navy) inset !important;
+}
+
+.app-stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 3px;
+}
+
+.app-stat-value {
+  font-size: 26px;
+  font-weight: 800;
+}
+
+/* ── Bottom section (kept for reference, no longer used as wrapper) ── */
+.app-bottom-section {
+  display: flex;
+  gap: 14px;
+  margin: 0 18px 0;
+  align-items: stretch;
+  flex: 1;
+}
+
+.app-bottom-camera {
+  width: 280px;
+  height: 196px;
+  flex-shrink: 0;
+  background: var(--tint-300);
+  border: 1px solid var(--tint-100);
+  border-radius: 7px;
+  min-width: 280px;
+  min-height: 196px;
+  max-width: 280px;
+  max-height: 196px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(36, 60, 92, 0.07);
+  margin-top: 10px;
+}
+
+.app-camera-button {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.app-camera-img {
+  width: 280px;
+  height: 196px;
+  max-width: 280px;
+  max-height: 196px;
+  object-fit: contain;
+  border-radius: 7px;
+  display: block;
+}
+
+.app-camera-placeholder {
+  width: 280px;
+  height: 196px;
+}
+
+/* ── Table ─────────────────────────────────────────────────── */
+.app-table-wrap {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: var(--surface);
+  border: 1px solid var(--tint-200);
+  border-radius: 7px;
+  overflow: auto;
+  box-shadow: 0 1px 4px rgba(36, 60, 92, 0.07);
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-drag: none;
+  overscroll-behavior: contain;
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.app-table {
+  min-width: 100%;
+  width: max-content;
+  border-collapse: collapse;
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  touch-action: pan-x pan-y;
+}
+
+.app-table-head {
+  background: var(--navy);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.app-th {
+  padding: 9px 12px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 12px;
+  color: #ffffff;
+  border-bottom: 2px solid var(--navy-deep);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.app-td {
+  padding: 7px 12px;
+  font-size: 12px;
+  color: var(--text-base);
+  border-bottom: 1px solid var(--tint-200);
+}
+
+.app-td-error {
+  color: var(--red-text);
+}
+
+.app-td-batch-correction,
+.app-td-product-name,
+.app-td-packbox {
+  max-width: 160px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.app-td-product-name::-webkit-scrollbar {
+    display: none;
+}
+
+.app-td-product-name {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+    overflow: auto;            /* Ensures scrolling still works */
+}
+
+
+.app-row-even {
+  background: var(--surface);
+}
+
+.app-row-odd {
+  background: var(--tint-300);
+}
+
+.app-empty-td {
+  padding: 28px;
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 13px;
+}
+
+/* ── Button row ────────────────────────────────────────────── */
+.app-btn-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  padding: 8px 18px 14px;
+  flex-shrink: 0;
+}
+
+.app-btn-clear {
+  background: var(--surface);
+  border-color: var(--tint-100);
+  color: var(--text-muted);
+  padding: 6px 20px;
+}
+
+.app-btn-clear:hover {
+  background: var(--tint-300);
+  border-color: var(--tint-100);
+}
+
+.app-btn-submit {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #ffffff;
+  padding: 6px 20px;
+  box-shadow: 0 1px 4px rgba(36, 60, 92, 0.25);
+}
+
+.app-btn-submit:hover:not(:disabled) {
+  background: var(--navy-deep);
+  border-color: var(--navy-deep);
+}
+
+.app-btn-logout {
+  background: var(--surface);
+  border-color: var(--red-mid);
+  color: var(--red-text);
+  padding: 6px 20px;
+}
+
+.app-btn-logout:hover {
+  background: var(--red-soft);
+}
+
+/* ── Spacer ────────────────────────────────────────────────── */
+.app-spacer {
+  height: 10px;
+}
+
+/* ── Config trigger ────────────────────────────────────────── */
+.app-config-trigger {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--tint-100);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--navy);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 4px 16px rgba(36, 60, 92, 0.18);
+  cursor: pointer;
+  z-index: 20;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.app-config-trigger:hover {
+  background: var(--tint-300);
+  border-color: var(--navy-soft);
+}
+
+/* ── Config popup ──────────────────────────────────────────── */
+.app-config-popup {
+  position: fixed;
+  left: 18px;
+  bottom: 64px;
+  width: min(320px, calc(100vw - 36px));
+  background: var(--surface);
+  border: 1px solid var(--tint-200);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(36, 60, 92, 0.18);
+  padding: 14px;
+  z-index: 20;
+}
+
+.app-config-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 10px;
+}
+
+.app-config-close {
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.app-config-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.app-config-error {
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--red-soft);
+  color: #b91c1c;
+  font-size: 12px;
+}
+
+.app-config-list {
+  display: grid;
+  gap: 8px;
+}
+
+.app-config-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--tint-200);
+}
+
+.app-config-row:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.app-config-label {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.app-config-value {
+  max-width: 170px;
+  text-align: right;
+  word-break: break-word;
+  color: var(--text-base);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ── Image modal ───────────────────────────────────────────── */
+.app-image-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 45, 69, 0.93);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-image-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 22px 10px;
+}
+
+.app-image-zoom-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(214, 228, 240, 0.12);
+}
+
+.app-image-toolbar-btn,
+.app-image-close {
+  border: 1px solid rgba(214, 228, 240, 0.3);
+  background: rgba(214, 228, 240, 0.12);
+  color: #d6e4f0;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.app-image-toolbar-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.app-image-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.app-image-toolbar-btn:hover,
+.app-image-close:hover {
+  background: rgba(214, 228, 240, 0.25);
+}
+
+.app-image-zoom-text {
+  min-width: 52px;
+  text-align: center;
+  color: #d6e4f0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.app-image-stage {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.app-image-modal-img {
+  max-width: min(92vw, 1600px);
+  max-height: calc(100vh - 120px);
+  transform-origin: center center;
+}
+
+/* ── 1024 × 768 (4 : 3) compact layout ───────────────────────
+   At 1100 px and below the two fixed side columns (325 px each) leave
+   only ~310 px for the centre column.  The 4 stat boxes end up at ~70 px
+   each, which is too narrow for labels like "PENDING QTY" at 11 px — they
+   wrap and push the bottom table section off-screen.
+   Fix: shrink side columns to 220 px and tighten stat-box typography.
+   ────────────────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .app-left-col {
+    width: 220px;
+  }
+
+  .app-info-value {
+    max-width: 80px;
+  }
+
+  .app-stat-box {
+    padding: 6px 8px;
+  }
+
+  .app-stat-label {
+    font-size: 9px;
+  }
+
+  .app-stat-value {
+    font-size: 20px;
+  }
+
+  .app-bottom-camera {
+    width: 220px;
+    min-width: 220px;
+    max-width: 220px;
+    height: 164px;
+    min-height: 164px;
+    max-height: 164px;
+  }
+
+  .app-camera-img,
+  .app-camera-placeholder {
+    width: 220px;
+    height: 164px;
+    max-width: 220px;
+    max-height: 164px;
+  }
+}
+
+/* --- Auto-update banner --- */
+.update-banner {
+  width: 100%;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 1000;
+}
+
+.update-banner--info {
+  background: #1a3a5c;
+  color: #a8d4f5;
+}
+
+.update-banner--ready {
+  background: #1a4a2e;
+  color: #7de0a0;
+}
+
+.update-banner--error {
+  background: #4a1a1a;
+  color: #f08080;
+}
+
+.update-install-btn {
+  padding: 3px 12px;
+  background: #2ecc71;
+  color: #0a1a0f;
+  border: none;
+  border-radius: 4px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.update-install-btn:hover {
+  background: #27ae60;
+}
+
+/* ── Pack Box button ────────────────────────────────────────── */
+.app-packbox-btn {
+  margin-top: 12px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 14px 12px;
+  background: var(--navy);
+  color: #fff;
+  border: 2px solid var(--navy-deep);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+  box-shadow: 0 2px 6px rgba(36, 60, 92, 0.25);
+}
+
+.app-packbox-btn:hover:not(:disabled) {
+  background: var(--navy-deep);
+}
+
+.app-packbox-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.app-packbox-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.app-packbox-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  opacity: 0.9;
+}
+
+.app-packbox-number {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.app-packbox-sublabel {
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
+
+/* Scan flash border — thick bars on all four edges of the screen */
+.scan-flash-line {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.scan-flash-line--top    { top: 0;    left: 0; right: 0;  height: 8px; }
+.scan-flash-line--bottom { bottom: 0; left: 0; right: 0;  height: 8px; }
+.scan-flash-line--left   { left: 0;   top: 0;  bottom: 0; width: 8px;  }
+.scan-flash-line--right  { right: 0;  top: 0;  bottom: 0; width: 8px;  }
+
+.scan-flash-line--accepted {
+  background: #22c55e;
+  animation: flash-accepted 1.2s ease-out forwards;
+}
+
+.scan-flash-line--rejected {
+  background: #ef4444;
+  animation: flash-rejected 1.2s ease-out forwards;
+}
+
+@keyframes flash-accepted {
+  0%   { opacity: 1; box-shadow: 0 0 16px 6px #22c55e; }
+  40%  { opacity: 1; box-shadow: 0 0 24px 8px #22c55e; }
+  70%  { opacity: 0.7; box-shadow: 0 0 14px 4px #22c55e; }
+  100% { opacity: 0; box-shadow: none; }
+}
+
+@keyframes flash-rejected {
+  0%   { opacity: 1; box-shadow: 0 0 16px 6px #ef4444; }
+  25%  { opacity: 0.2; box-shadow: 0 0 8px 2px #ef4444; }
+  50%  { opacity: 1; box-shadow: 0 0 24px 8px #ef4444; }
+  75%  { opacity: 0.2; box-shadow: 0 0 8px 2px #ef4444; }
+  100% { opacity: 0; box-shadow: none; }
+}
